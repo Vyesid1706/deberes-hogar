@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f5e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Deberes del Hogar</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2a27;--mute:#6b7773;--brand:#2f6f5e;--brand-d:#245547;--line:#e5e1d8;--bad:#b3402e;--ok:#2f7d4f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:19px}
+header p{margin:2px 0 0;font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{padding:14px;max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.title{font-weight:600}
+.sub{font-size:13px;color:var(--mute)}
+.chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;color:#fff}
+h2{font-size:15px;margin:18px 2px 8px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+input,select,button{font:inherit}
+input[type=text],input[type=email],input[type=time],input[type=number],select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+button{border:0;border-radius:10px;padding:11px 14px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+button:active{background:var(--brand-d)}
+button.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+button.del{background:none;color:var(--bad);padding:6px 8px;font-size:18px}
+button.full{width:100%;margin-top:8px}
+button:disabled{opacity:.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.weeknav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.weeknav button{padding:8px 14px}
+.empty{text-align:center;color:var(--mute);padding:26px 10px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;background:none;color:var(--mute);border-radius:0;padding:10px 2px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:20px}
+nav button.on{color:var(--brand)}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));background:#1f2a27;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;display:none;z-index:9}
+label.sw{display:flex;align-items:center;gap:8px}
+input[type=checkbox]{width:24px;height:24px;accent-color:var(--brand);flex:none}
+ol{padding-left:20px;margin:6px 0}
+code{background:#eee9dd;padding:1px 5px;border-radius:5px;font-size:13px;word-break:break-all}
+.done .title{text-decoration:line-through;color:var(--mute)}
+.note{font-size:13px;color:var(--mute);margin:6px 2px 10px}
+.who{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+<header><h1>🏠 Deberes del Hogar</h1><p id="sub"></p></header>
+<main id="main"></main>
+<div id="toast"></div>
+<nav id="nav"></nav>
+
+<script>
+'use strict';
+/* =======================================================================
+   Modelo: el calendario compartido "Deberes del hogar" es la base de datos.
+   - La configuración (personas, deberes, rotación) vive en la descripción
+     del calendario, con prefijo DH1:.
+   - Cada deber es un evento con propiedades privadas (dhKey, dhDone...),
+     así cualquier teléfono puede encontrarlo y actualizarlo.
+   ======================================================================= */
+
+const DAYS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const COLORS=['#2f6f5e','#c2553a','#3b6fb6','#a8761d','#7a4aa3','#2b8a9e','#b0407a','#5c7a29'];
+const KEY='deberes-hogar-v2';
+const SCOPE='openid email https://www.googleapis.com/auth/calendar';
+const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone;
+const PREFIX='DH1:';
+// Si pegas aquí el Client ID, todos los teléfonos funcionan sin configurar nada.
+const CLIENT_ID_DEFAULT='';
+const DEFAULT_CHORES=['Lavar los platos','Sacar la basura','Barrer y trapear','Limpiar el baño','Cocinar','Lavar la ropa','Ordenar la sala','Regar las plantas'];
+
+let S=load();
+let tok=null, tokExp=0, busy=false, tab='semana', wOff=0;
+let VIEW=[];          // asignaciones de la semana mostrada
+let EVMAP={};         // key -> evento de Google
+let CALPICK=[];       // calendarios para elegir
+let CONNECTED=false;
+
+function load(){
+  let s={};
+  try{ s=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  return Object.assign({
+    clientId:CLIENT_ID_DEFAULT, calendarId:'', calendarName:'', account:'',
+    members:[], overrides:{}, weeks:4,
+    chores:DEFAULT_CHORES.map((n,i)=>({id:'c'+i,name:n,active:false,day:i%7,time:'18:00'}))
+  }, s);
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- Fechas ---------- */
+function monday(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseISO(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function weekIndex(m){return Math.round((m-new Date(2024,0,1))/(7*864e5));} // 1-ene-2024 fue lunes
+function fmt(d){return d.toLocaleDateString('es',{day:'numeric',month:'short'});}
+function dateAt(d,time){const [h,m]=String(time||'18:00').split(':').map(Number);const x=new Date(d);x.setHours(h||0,m||0,0,0);return x;}
+
+/* ---------- Rotación (determinista: igual en todos los teléfonos) ---------- */
+function assignments(mon){
+  const act=S.chores.filter(c=>c.active), n=S.members.length;
+  if(!n) return [];
+  const w=weekIndex(mon);
+  return act.map((c,j)=>{
+    const key=iso(mon)+'|'+c.id;
+    const ov=S.members.find(m=>m.id===S.overrides[key]);
+    const member=ov||S.members[((j+w)%n+n)%n];
+    return {key,chore:c,member,date:addDays(mon,c.day)};
+  }).sort((a,b)=>a.date-b.date||a.chore.time.localeCompare(b.chore.time));
+}
+const colorOf=m=>COLORS[Math.max(0,S.members.findIndex(x=>x.id===m.id))%COLORS.length];
+
+/* ---------- Google ---------- */
+function auth(){
+  return new Promise((res,rej)=>{
+    if(!S.clientId) return rej(new Error('Falta el Client ID de Google (pestaña Ajustes).'));
+    if(tok&&Date.now()<tokExp) return res();
+    if(!window.google||!google.accounts) return rej(new Error('No se pudo cargar Google. Revisa tu conexión a internet.'));
+    const tc=google.accounts.oauth2.initTokenClient({
+      client_id:S.clientId, scope:SCOPE,
+      callback:r=>{
+        if(r.error) return rej(new Error(r.error));
+        tok=r.access_token; tokExp=Date.now()+(Number(r.expires_in||3600)-60)*1000;
+        res();
+      },
+      error_callback:e=>{
+        const t=(e&&(e.type||e.message))||'';
+        if(/popup/i.test(t)) return rej(new Error('El navegador bloqueó la ventana de Google. Abre la app en Chrome y vuelve a intentar.'));
+        rej(new Error(t||'Autorización cancelada'));
+      }
+    });
+    tc.requestAccessToken();
+  });
+}
+async function api(path,opt={}){
+  const r=await fetch('https://www.googleapis.com/calendar/v3'+path,{
+    ...opt,
+    headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'}
+  });
+  if(r.status===401){ tok=null; tokExp=0; const e=new Error('La sesión de Google caducó. Toca «Conectar con Google».'); e.status=401; throw e; }
+  if(!r.ok){ let m='Error '+r.status; try{ m=(await r.json()).error.message; }catch(e){} const err=new Error(m); err.status=r.status; throw err; }
+  return r.status===204?null:r.json();
+}
+const enc=encodeURIComponent;
+
+/* ---------- Configuración en el calendario ---------- */
+function packCfg(){
+  return {m:S.members.map(x=>[x.id,x.name,x.email||'']),
+          c:S.chores.map(x=>[x.id,x.name,x.active?1:0,x.day,x.time]),
+          o:S.overrides, w:S.weeks};
+}
+function applyCfg(o){
+  if(!o) return;
+  if(Array.isArray(o.m)) S.members=o.m.map(a=>({id:a[0],name:a[1],email:a[2]||''}));
+  if(Array.isArray(o.c)) S.chores=o.c.map(a=>({id:a[0],name:a[1],active:!!a[2],day:a[3]|0,time:a[4]||'18:00'}));
+  if(o.o&&typeof o.o==='object') S.overrides=o.o;
+  if(o.w) S.weeks=o.w;
+  save();
+}
+async function pullCfg(){
+  const cal=await api('/calendars/'+enc(S.calendarId));
+  S.calendarName=cal.summary||'';
+  const d=String(cal.description||'');
+  if(d.indexOf(PREFIX)===0){
+    try{ applyCfg(JSON.parse(d.slice(PREFIX.length))); }catch(e){ }
+  }
+  return true;
+}
+async function pushCfg(){
+  await api('/calendars/'+enc(S.calendarId),{method:'PATCH',body:JSON.stringify({description:PREFIX+JSON.stringify(packCfg())})});
+}
+
+/* ---------- Eventos ---------- */
+function eventBody(a,prev,mark){
+  const p=(prev&&prev.extendedProperties&&prev.extendedProperties.private)||{};
+  // el estado "hecho" se conserva si la persona no cambió
+  const done = mark ? !!mark.done : (p.dhDone==='1'&&p.dhMember===a.member.id);
+  const by = done ? (mark?mark.by:(p.dhBy||'')) : '';
+  const at = done ? (mark?mark.at:(p.dhAt||'')) : '';
+  const start=dateAt(a.date,a.chore.time);
+  const end=new Date(start.getTime()+30*60000);
+  return {
+    summary:(done?'✅ ':'🏠 ')+a.chore.name+' — '+a.member.name,
+    description:'Creado por la app Deberes del Hogar.',
+    start:{dateTime:start.toISOString(),timeZone:TZ},
+    end:{dateTime:end.toISOString(),timeZone:TZ},
+    reminders:{useDefault:false,overrides:[{method:'popup',minutes:30}]},
+    extendedProperties:{private:{dhApp:'1',dhKey:a.key,dhChore:a.chore.id,dhMember:a.member.id,
+      dhDone:done?'1':'0',dhBy:by,dhAt:at}}
+  };
+}
+async function listEvents(from,to){
+  const q=new URLSearchParams({
+    privateExtendedProperty:'dhApp=1',
+    timeMin:dateAt(from,'00:00').toISOString(),
+    timeMax:dateAt(to,'23:59').toISOString(),
+    singleEvents:'true', maxResults:'2500'
+  });
+  const r=await api('/calendars/'+enc(S.calendarId)+'/events?'+q);
+  const map={};
+  (r.items||[]).forEach(ev=>{
+    const k=ev.extendedProperties&&ev.extendedProperties.private&&ev.extendedProperties.private.dhKey;
+    if(k) map[k]=ev;
+  });
+  return map;
+}
+async function upsert(a,mark){
+  const prev=EVMAP[a.key];
+  const body=eventBody(a,prev,mark);
+  body.iCalUID='dh-'+a.key.replace('|','-')+'@deberes.hogar';
+  const json=JSON.stringify(body);
+  if(prev&&prev.id){
+    EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(prev.id),{method:'PATCH',body:json});
+  }else{
+    try{
+      EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events',{method:'POST',body:json});
+    }catch(e){
+      if(e.status!==409) throw e;
+      const d=parseISO(a.key.split('|')[0]);
+      const map=await listEvents(addDays(d,-1),addDays(d,2));
+      const found=map[a.key];
+      if(!found) throw e;
+      EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(found.id),{method:'PATCH',body:json});
+    }
+  }
+}
+async function pushWeeks(weeks){
+  if(!S.calendarId) throw new Error('Primero vincula el calendario (Ajustes).');
+  const mon=monday(new Date());
+  const want=[], valid=new Set();
+  for(let w=0;w<weeks;w++) for(const a of assignments(addDays(mon,w*7))){ want.push(a); valid.add(a.key); }
+  EVMAP=await listEvents(addDays(mon,-1),addDays(mon,weeks*7+2));
+  let n=0;
+  for(const a of want){
+    try{ await upsert(a); n++; }
+    catch(e){ if(e.status===401) throw e; }
+  }
+  // borra del calendario lo que ya no corresponde
+  for(const k of Object.keys(EVMAP)){
+    if(!valid.has(k)){
+      try{ await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(EVMAP[k].id),{method:'DELETE'}); }catch(e){}
+      delete EVMAP[k];
+    }
+  }
+  return n;
+}
+
+/* ---------- Calendario compartido ---------- */
+async function findCalendar(){
+  const r=await api('/users/me/calendarList?maxResults=250');
+  const items=(r.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
+  const match=items.filter(c=>/deberes del hogar/i.test(c.summary||''));
+  if(match.length) return match[0];
+  return null;
+}
+async function listWritable(){
+  const r=await api('/users/me/calendarList?maxResults=250');
+  return (r.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
+}
+async function createCalendar(){
+  const c=await api('/calendars',{method:'POST',body:JSON.stringify({summary:'Deberes del hogar',timeZone:TZ})});
+  S.calendarId=c.id; S.calendarName=c.summary||'Deberes del hogar'; save();
+  await pushCfg();
+  return S.calendarName;
+}
+async function shareAll(){
+  const cal=enc(S.calendarId); let added=0, already=0, failed=0;
+  for(const m of S.members){
+    if(!m.email) continue;
+    try{
+      await api('/calendars/'+cal+'/acl',{method:'POST',body:JSON.stringify({role:'writer',scope:{type:'user',value:m.email}})});
+      added++;
+    }catch(e){ (e.status===409?already++:failed++); }
+  }
+  return {added,already,failed};
+}
+
+/* ---------- Sincronización general ---------- */
+async function connect(){
+  await auth();
+  if(!S.account){
+    try{ const u=await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})).json(); if(u&&u.email) S.account=u.email; save(); }catch(e){}
+  }
+  CONNECTED=true;
+  if(!S.calendarId){
+    const c=await findCalendar();
+    if(c){ S.calendarId=c.id; S.calendarName=c.summary; save(); }
+  }
+  if(S.calendarId) await pullCfg();
+}
+async function refresh(quiet){
+  if(!tok||Date.now()>=tokExp) return;
+  if(!S.calendarId) return;
+  try{
+    await pullCfg();
+    const mon=addDays(monday(new Date()),wOff*7);
+    EVMAP=await listEvents(addDays(mon,-1),addDays(mon,8));
+  }catch(e){ if(!quiet) throw e; }
+  render();
+}
+
+/* ---------- UI ---------- */
+function toast(msg,ms=3500){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',ms);}
+async function run(label,fn){
+  if(busy) return; busy=true; render(); toast(label+'…',60000);
+  try{ const r=await fn(); toast('Listo ✔'+(r!=null?` (${r})`:'')); }
+  catch(e){ toast('Error: '+e.message,7000); }
+  busy=false; try{ render(); }catch(e){}
+}
+const doneOf=k=>{const p=EVMAP[k]&&EVMAP[k].extendedProperties&&EVMAP[k].extendedProperties.private;return p&&p.dhDone==='1'?p:null;};
+
+function viewSemana(){
+  const mon=addDays(monday(new Date()),wOff*7);
+  VIEW=assignments(mon);
+  let h=`<div class="weeknav"><button class="ghost" data-a="prev">‹</button>
+    <div style="text-align:center"><div class="title">${wOff===0?'Esta semana':wOff===1?'Próxima semana':wOff===-1?'Semana pasada':'Semana'}</div>
+    <div class="sub">${fmt(mon)} – ${fmt(addDays(mon,6))}</div></div>
+    <button class="ghost" data-a="next">›</button></div>`;
+
+  if(!S.members.length){ h+=`<div class="card empty">Agrega a las personas de la casa en la pestaña <b>Familia</b>.</div>`; return h; }
+  if(!VIEW.length){ h+=`<div class="card empty">Aún no escogiste deberes. Actívalos en la pestaña <b>Deberes</b>.</div>`; return h; }
+
+  VIEW.forEach(a=>{
+    const d=doneOf(a.key);
+    h+=`<div class="card ${d?'done':''}"><div class="row">
+      <input type="checkbox" data-a="done" data-key="${esc(a.key)}" ${d?'checked':''}>
+      <div class="grow"><div class="title">${esc(a.chore.name)}</div>
+        <div class="sub">${DAYS[a.chore.day]} ${a.date.getDate()} · ${esc(a.chore.time)}${d&&d.dhBy?` · <span class="who">hecho por ${esc(d.dhBy)}</span>`:''}</div></div>
+      <select data-a="override" data-key="${esc(a.key)}" style="width:auto;max-width:42%;font-weight:600;color:${colorOf(a.member)}">
+      ${S.members.map(m=>`<option value="${m.id}" ${m.id===a.member.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
+    </div></div>`;
+  });
+  h+=`<button class="full" data-a="sync">📅 Enviar ${S.weeks} semanas a Google Calendar</button>
+    <p class="note" style="text-align:center">La rotación cambia sola cada semana. Cambia el nombre para reasignar.</p>`;
+  return h;
+}
+function viewDeberes(){
+  let h=`<p class="note">Activa los deberes que se reparten y elige día y hora.</p>`;
+  S.chores.forEach(c=>{
+    h+=`<div class="card"><div class="row"><label class="sw grow"><input type="checkbox" data-a="toggle" data-id="${c.id}" ${c.active?'checked':''}><span class="title">${esc(c.name)}</span></label>
+      <button class="del" data-a="delchore" data-id="${c.id}">✕</button></div>
+      <div class="grid2"><select data-a="day" data-id="${c.id}">${DAYS.map((d,i)=>`<option value="${i}" ${i===c.day?'selected':''}>${d}</option>`).join('')}</select>
+      <input type="time" data-a="time" data-id="${c.id}" value="${esc(c.time)}"></div></div>`;
+  });
+  h+=`<h2>Nuevo deber</h2><div class="card"><input type="text" id="newchore" placeholder="Ej: Sacar al perro"><button class="full" data-a="addchore">Agregar deber</button></div>`;
+  return h;
+}
+function viewFamilia(){
+  let h=`<p class="note">Todos ven los mismos deberes en el calendario compartido «${esc(S.calendarName||'Deberes del hogar')}».</p>`;
+  S.members.forEach((m,i)=>{
+    h+=`<div class="card"><div class="row"><span class="chip" style="background:${COLORS[i%COLORS.length]}">${esc(m.name)}</span>
+      <div class="grow sub">${esc(m.email||'sin correo')}</div><button class="del" data-a="delmember" data-id="${m.id}">✕</button></div></div>`;
+  });
+  h+=`<h2>Agregar persona</h2><div class="card"><input type="text" id="nm" placeholder="Nombre"><div style="height:8px"></div>
+    <input type="email" id="ne" placeholder="Correo de Google (para que use la app)"><button class="full" data-a="addmember">Agregar</button></div>
+    <button class="full ghost" data-a="share">👥 Compartir el calendario con la familia</button>
+    <p class="note">Compartir da permiso de <b>edición</b>: cada uno entra con su propia cuenta desde su teléfono.</p>`;
+  return h;
+}
+function viewAjustes(){
+  const on=CONNECTED&&tok;
+  let h=`<div class="card"><div class="title">Conexión con Google</div>
+    <p class="sub">${on?('Conectado como '+(S.account||'tu cuenta')):'Sin conectar'}</p>
+    <label class="sub">Client ID (ver CONFIGURACION.md)</label>
+    <input type="text" id="cid" value="${esc(S.clientId)}" placeholder="1234-abc.apps.googleusercontent.com">
+    <button class="full" data-a="connect">${on?'🔄 Volver a conectar':'🔑 Conectar con Google'}</button></div>`;
+
+  h+=`<div class="card"><div class="title">Calendario compartido</div>
+    <p class="sub">${S.calendarId?esc(S.calendarName||'vinculado'):'sin vincular'}</p>
+    <button class="full ghost" data-a="findcal">🔎 Buscar el calendario de la familia</button>
+    <button class="full ghost" data-a="pickcal">📋 Elegir de mi lista</button>
+    <button class="full ghost" data-a="newcal">➕ Crear «Deberes del hogar»</button>
+    <label class="sub" style="display:block;margin-top:10px">Semanas a enviar</label>
+    <input type="number" id="wk" min="1" max="12" value="${S.weeks}">
+    <button class="full" data-a="savecfg">Guardar</button></div>`;
+
+  if(CALPICK.length){
+    h+=`<div class="card"><div class="title">Elige el calendario</div>
+      <select id="pick">${CALPICK.map(c=>`<option value="${esc(c.id)}" ${c.id===S.calendarId?'selected':''}>${esc(c.summary)}</option>`).join('')}</select>
+      <button class="full" data-a="pickgo">Vincular este calendario</button></div>`;
+  }
+
+  h+=`<button class="full" data-a="sync">📅 Sincronizar calendario</button>
+    <button class="full ghost" data-a="share">👥 Compartir con la familia</button>
+    <button class="full ghost" data-a="reset" style="color:var(--bad);border-color:var(--bad)">Borrar datos de este teléfono</button>
+    <p class="note" style="text-align:center">La configuración se guarda en el calendario, no en el teléfono: cualquier persona de la casa ve lo mismo.</p>`;
+  return h;
+}
+function render(){
+  const sub=document.getElementById('sub');
+  sub.textContent=S.members.length?S.members.map(m=>m.name).join(' · '):'Reparte los deberes sin pelear';
+  let html;
+  try{
+    html={semana:viewSemana,deberes:viewDeberes,familia:viewFamilia,ajustes:viewAjustes}[tab]();
+  }catch(e){ html='<div class="card empty">Error: '+esc(e.message)+'</div>'; }
+  document.getElementById('main').innerHTML=html;
+  const tabs=[['semana','🗓️','Semana'],['deberes','🧹','Deberes'],['familia','👨‍👩‍👧','Familia'],['ajustes','⚙️','Ajustes']];
+  document.getElementById('nav').innerHTML=tabs.map(t=>`<button data-a="tab" data-t="${t[0]}" class="${tab===t[0]?'on':''}"><span>${t[1]}</span>${t[2]}</button>`).join('');
+}
+
+/* ---------- Acciones ---------- */
+function findAssignment(key){
+  const a=VIEW.find(x=>x.key===key);
+  if(a) return a;
+  const mon=monday(parseISO(key.split('|')[0]));
+  return assignments(mon).find(x=>x.key===key)||null;
+}
+async function afterCfgChange(){
+  await pushCfg();
+  await pushWeeks(S.weeks);
+}
+
+function onAction(e){
+  const el=e.target.closest('[data-a]'); if(!el) return;
+  const a=el.dataset.a, ch=e.type==='change';
+  if(busy&&a!=='tab') return;
+  const chore=S.chores.find(c=>c.id===el.dataset.id);
+
+  if(a==='tab'&&!ch){ tab=el.dataset.t; render(); window.scrollTo(0,0); }
+  else if(a==='prev'&&!ch){ wOff--; render(); refresh(true); }
+  else if(a==='next'&&!ch){ wOff++; render(); refresh(true); }
+
+  else if(a==='override'&&ch){
+    const asg=findAssignment(el.dataset.key); if(!asg) return;
+    if(el.value===asg.member.id){ delete S.overrides[el.dataset.key]; }
+    else { S.overrides[el.dataset.key]=el.value; }
+    save();
+    run('Reasignando',async()=>{ await pushCfg(); await upsert(findAssignment(el.dataset.key)); return null; });
+    render();
+  }
+  else if(a==='done'&&ch){
+    const asg=findAssignment(el.dataset.key); if(!asg) return;
+    const done=el.checked;
+    const mark={done, by:done?(S.account||asg.member.name):'', at:done?new Date().toISOString():''};
+    run(done?'Marcando hecho':'Desmarcando',async()=>{ await upsert(asg,mark); return null; });
+    render();
+  }
+  else if(a==='toggle'&&ch){ chore.active=el.checked; run('Guardando',afterCfgChange); }
+  else if(a==='day'&&ch){ chore.day=+el.value; run('Guardando',afterCfgChange); }
+  else if(a==='time'&&ch){ chore.time=el.value||'18:00'; run('Guardando',afterCfgChange); }
+  else if(a==='delchore'&&!ch){ if(confirm('¿Quitar este deber?')){ S.chores=S.chores.filter(c=>c.id!==el.dataset.id); run('Quitando',afterCfgChange); render(); } }
+  else if(a==='addchore'&&!ch){ const v=document.getElementById('newchore').value.trim(); if(v){ S.chores.push({id:'c'+uid(),name:v,active:true,day:0,time:'18:00'}); run('Agregando',afterCfgChange); render(); } }
+  else if(a==='addmember'&&!ch){ const n=document.getElementById('nm').value.trim(), m=document.getElementById('ne').value.trim(); if(n){ S.members.push({id:'m'+uid(),name:n,email:m}); run('Agregando',afterCfgChange); render(); } }
+  else if(a==='delmember'&&!ch){ if(confirm('¿Quitar a esta persona?')){ S.members=S.members.filter(m=>m.id!==el.dataset.id); run('Quitando',afterCfgChange); render(); } }
+
+  else if(a==='connect'&&!ch){
+    S.clientId=(document.getElementById('cid')&&document.getElementById('cid').value.trim())||S.clientId;
+    save();
+    run('Conectando',async()=>{ tok=null; tokExp=0; await connect(); if(S.calendarId) return S.calendarName||'calendario listo'; return null; });
+  }
+  else if(a==='savecfg'&&!ch){
+    S.clientId=(document.getElementById('cid')&&document.getElementById('cid').value.trim())||S.clientId;
+    S.weeks=Math.min(12,Math.max(1,+document.getElementById('wk').value||4));
+    save(); toast('Guardado ✔');
+  }
+  else if(a==='findcal'&&!ch){
+    run('Buscando',async()=>{ await auth(); const c=await findCalendar();
+      if(!c) throw new Error('No encontré el calendario. Pide que te lo compartan o créalo.');
+      S.calendarId=c.id; S.calendarName=c.summary; save(); await pullCfg(); return c.summary; });
+  }
+  else if(a==='pickcal'&&!ch){
+    run('Leyendo calendarios',async()=>{ await auth(); CALPICK=await listWritable(); return CALPICK.length+' calendarios'; });
+  }
+  else if(a==='pickgo'&&!ch){
+    const sel=document.getElementById('pick');
+    if(!sel||!sel.value) return;
+    S.calendarId=sel.value; S.calendarName=sel.options[sel.selectedIndex].textContent; CALPICK=[]; save();
+    run('Vinculando',async()=>{ await pullCfg(); return S.calendarName; });
+  }
+  else if(a==='newcal'&&!ch){
+    run('Creando',async()=>{ await auth(); const n=await createCalendar(); await pushCfg(); return n; });
+  }
+  else if(a==='share'&&!ch){
+    run('Compartiendo',async()=>{ await auth(); const r=await shareAll();
+      return `${r.added} nuevos${r.already?', '+r.already+' ya lo tenían':''}${r.failed?', '+r.failed+' fallaron':''}`; });
+  }
+  else if(a==='sync'&&!ch){ run('Sincronizando',async()=>{ await auth(); await pullCfg(); const n=await pushWeeks(S.weeks); return n+' eventos'; }); }
+  else if(a==='reset'&&!ch){ if(confirm('Se borrarán los datos guardados en este teléfono. El calendario de Google no se toca.')){ localStorage.removeItem(KEY); S=load(); tok=null; tokExp=0; CONNECTED=false; EVMAP={}; render(); } }
+}
+document.addEventListener('click',onAction);
+document.addEventListener('change',onAction);
+
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(true); });
+</script>
+</body>
+</html>
