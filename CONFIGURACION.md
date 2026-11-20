@@ -2,7 +2,7 @@
 
 Tres pasos: (1) crear el acceso de Google, (2) instalar en cada teléfono, (3) compartir el calendario. La app ya está publicada en:
 
-> **__APP_URL__**
+> **https://vyesid1706.github.io/deberes-hogar/**
 
 ---
 
@@ -30,7 +30,7 @@ Hazlo con la cuenta de Google del organizador (la persona que crea el calendario
 2. Tipo de aplicación: **Aplicación web**. Nombre: `Deberes web`.
 3. **Orígenes de JavaScript autorizados → Agregar URI**, y añade exactamente estos dos:
    ```
-   __ORIGIN__
+   https://vyesid1706.github.io
    http://localhost:8000
    ```
    Solo el origen: `https://algo.github.io`, sin ruta y sin `/` al final.
@@ -42,7 +42,7 @@ Hazlo con la cuenta de Google del organizador (la persona que crea el calendario
 
 ## 2. Instalar en cada teléfono
 
-1. Abre **__APP_URL__** en el celular.
+1. Abre **https://vyesid1706.github.io/deberes-hogar/** en el celular.
 2. Instálala como app:
    - **Android (Chrome):** menú ⋮ → *Instalar aplicación*.
    - **iPhone (Safari):** Compartir → *Añadir a pantalla de inicio*.
