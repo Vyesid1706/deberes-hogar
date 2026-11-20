@@ -1,4 +1,4 @@
-const CACHE = 'deberes-hogar-v2';
+const CACHE = 'deberes-hogar-v3';
 const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

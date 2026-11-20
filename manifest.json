@@ -1,13 +1,14 @@
 {
   "name": "Deberes del Hogar",
   "short_name": "Deberes",
-  "description": "Reparte los deberes de la casa y envíalos a Google Calendar",
+  "description": "Reparte los deberes de la casa y sincronízalos con Google Calendar",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f4ef",
-  "theme_color": "#2f6f5e",
+  "background_color": "#f3f6f4",
+  "theme_color": "#17795c",
   "lang": "es",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
     {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
     {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}

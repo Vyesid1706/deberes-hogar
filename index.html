@@ -3,109 +3,240 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2f6f5e">
+<meta name="theme-color" content="#17795c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Deberes del Hogar</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2a27;--mute:#6b7773;--brand:#2f6f5e;--brand-d:#245547;--line:#e5e1d8;--bad:#b3402e;--ok:#2f7d4f}
+:root{
+  --bg:#f3f6f4; --card:#fff; --ink:#0f1b16; --mute:#6b7d76;
+  --brand:#17795c; --brand-2:#26a37c; --brand-ink:#fff;
+  --line:rgba(15,27,22,.09); --line-2:rgba(15,27,22,.06);
+  --ok:#16915f; --bad:#c0392b; --warn:#b7791f;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 10px 28px -18px rgba(16,24,40,.35);
+  --r:18px; --nav-h:76px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b110f; --card:#141d19; --ink:#e9f0ec; --mute:#8fa39b;
+    --brand:#2aa87c; --brand-2:#35c493; --brand-ink:#04120c;
+    --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.05);
+    --ok:#3ecf8e; --bad:#ff7a6b; --warn:#e0b155;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -20px rgba(0,0,0,.9);
+  }
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;position:sticky;top:0;z-index:5}
-header h1{margin:0;font-size:19px}
-header p{margin:2px 0 0;font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-main{padding:14px;max-width:640px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
-.row{display:flex;align-items:center;gap:10px}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px);-webkit-font-smoothing:antialiased}
+@media (prefers-reduced-motion:no-preference){*{transition:background .18s,color .18s,border-color .18s,transform .18s,opacity .18s}}
+
+/* ---------- barra superior ---------- */
+.appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-2)}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:19px;
+  background:linear-gradient(145deg,var(--brand),var(--brand-2));box-shadow:0 6px 16px -8px var(--brand)}
+.appbar h1{margin:0;font-size:16px;letter-spacing:-.01em}
+.appbar p{margin:0;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.pill{font-size:11.5px;font-weight:650;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--mute);white-space:nowrap}
+.pill.on{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%, transparent)}
+
+main{padding:14px 16px 8px;max-width:760px;margin:0 auto}
+@media (min-width:760px){ main{padding:22px 24px} .appbar{padding-left:24px;padding-right:24px} body{padding-bottom:130px} }
+
+/* ---------- tarjetas ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:14px;margin-bottom:12px}
+.card.tight{padding:10px 12px}
+.h2{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin:22px 4px 10px}
+.row{display:flex;align-items:center;gap:12px}
 .grow{flex:1;min-width:0}
-.title{font-weight:600}
+.title{font-weight:650;letter-spacing:-.01em}
 .sub{font-size:13px;color:var(--mute)}
-.chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;color:#fff}
-h2{font-size:15px;margin:18px 2px 8px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
-input,select,button{font:inherit}
-input[type=text],input[type=email],input[type=time],input[type=number],select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
-button{border:0;border-radius:10px;padding:11px 14px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
-button:active{background:var(--brand-d)}
-button.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-button.del{background:none;color:var(--bad);padding:6px 8px;font-size:18px}
-button.full{width:100%;margin-top:8px}
-button:disabled{opacity:.5}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.weeknav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.weeknav button{padding:8px 14px}
-.empty{text-align:center;color:var(--mute);padding:26px 10px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav button{flex:1;background:none;color:var(--mute);border-radius:0;padding:10px 2px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
-nav button span{font-size:20px}
-nav button.on{color:var(--brand)}
-#toast{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));background:#1f2a27;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;display:none;z-index:9}
-label.sw{display:flex;align-items:center;gap:8px}
-input[type=checkbox]{width:24px;height:24px;accent-color:var(--brand);flex:none}
-ol{padding-left:20px;margin:6px 0}
-code{background:#eee9dd;padding:1px 5px;border-radius:5px;font-size:13px;word-break:break-all}
-.done .title{text-decoration:line-through;color:var(--mute)}
-.note{font-size:13px;color:var(--mute);margin:6px 2px 10px}
-.who{color:var(--ok);font-weight:600}
+.sub.tight{font-size:12.5px}
+.mono{font-variant-numeric:tabular-nums}
+
+/* ---------- botones ---------- */
+button{font:inherit;border:0;background:none;color:inherit;cursor:pointer;padding:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:14px 16px;border-radius:14px;font-weight:650;font-size:15px;
+  background:linear-gradient(145deg,var(--brand),var(--brand-2));color:var(--brand-ink);
+  box-shadow:0 8px 22px -14px var(--brand)}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.soft{background:color-mix(in srgb,var(--brand) 12%, transparent);color:var(--brand);box-shadow:none}
+.btn.danger{background:none;border:1px solid color-mix(in srgb,var(--bad) 45%, transparent);color:var(--bad);box-shadow:none}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn.sm{padding:10px 14px;font-size:14px;width:auto}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);background:var(--card)}
+.icon-btn:active{background:var(--line-2)}
+.icon-btn.mini{width:34px;height:34px;border:0;background:none;color:var(--mute);font-size:16px}
+
+/* ---------- formularios ---------- */
+label.lbl{font-size:12.5px;color:var(--mute);font-weight:600;display:block;margin:12px 2px 6px}
+input[type=text],input[type=email],input[type=time],input[type=number],select{
+  width:100%;padding:13px 14px;border-radius:13px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--card) 92%, var(--bg));color:var(--ink);font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 16%, transparent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sw{position:relative;width:46px;height:28px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:.2s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:.2s}
+.sw input:checked + i{background:var(--brand)}
+.sw input:checked + i::after{transform:translateX(18px)}
+
+/* ---------- semana ---------- */
+.weekbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.weekbar .nav{display:flex;gap:8px}
+.wk-label{text-align:center;min-width:0}
+.wk-label .t{font-weight:700;font-size:15px;letter-spacing:-.01em}
+.wk-label .d{font-size:12.5px;color:var(--mute)}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.progress span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .35s}
+.stats{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mute);margin-top:8px}
+
+.chore{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);
+  border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-bottom:10px}
+.chore .body{flex:1;min-width:0}
+.chore .nm{font-weight:650;font-size:15px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chore .mt{font-size:12.5px;color:var(--mute);margin-top:1px}
+.chore.done .nm{text-decoration:line-through;color:var(--mute);font-weight:600}
+.chore.done{background:color-mix(in srgb,var(--card) 70%, var(--bg))}
+.chk{width:34px;height:34px;flex:none;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent;font-size:16px}
+.chore.done .chk{background:var(--ok);border-color:var(--ok);color:#fff}
+.who{display:flex;align-items:center;gap:7px;padding:7px 11px 7px 7px;border-radius:999px;
+  background:color-mix(in srgb,var(--av,var(--brand)) 12%, transparent);border:1px solid color-mix(in srgb,var(--av,var(--brand)) 25%, transparent)}
+.who b{font-size:13px;font-weight:650;color:var(--av,var(--brand));max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;background:var(--av,var(--brand));flex:none}
+.av.lg{width:34px;height:34px;font-size:13px}
+
+.empty{text-align:center;padding:34px 18px;color:var(--mute);font-size:14px}
+.empty .big{font-size:34px;margin-bottom:10px}
+
+/* ---------- lista de ajustes ---------- */
+.item{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line-2)}
+.item:last-child{border-bottom:0}
+.item .t{font-weight:600;font-size:14.5px}
+.item .s{font-size:12.5px;color:var(--mute)}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--brand) 14%, transparent);color:var(--brand)}
+
+/* ---------- nav ---------- */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb,var(--card) 88%, transparent);border-top:1px solid var(--line-2);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:14px;
+  font-size:11px;font-weight:650;color:var(--mute)}
+nav button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--brand);background:color-mix(in srgb,var(--brand) 10%, transparent)}
+@media (min-width:760px){ nav{left:50%;transform:translateX(-50%);max-width:420px;border:1px solid var(--line);
+  border-radius:20px;bottom:18px;box-shadow:var(--shadow)} }
+
+/* ---------- toast / hoja ---------- */
+#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);
+  background:#0f1b16;color:#fff;padding:13px 16px;border-radius:14px;font-size:14px;display:none;z-index:60;
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.6);max-width:520px;margin:0 auto}
+#sheet{position:fixed;inset:0;z-index:70;display:none}
+#sheet.open{display:block}
+.sheet-back{position:absolute;inset:0;background:rgba(6,12,10,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;
+  padding:10px 14px calc(18px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
+  animation:up .22s ease-out;max-height:80vh;overflow:auto}
+@keyframes up{from{transform:translateY(18px);opacity:.6}to{transform:none;opacity:1}}
+.handle{width:40px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 12px}
+.sheet h3{margin:0 6px 10px;font-size:16px}
+.sheet-item{display:flex;align-items:center;gap:12px;width:100%;padding:14px 12px;border-radius:13px;font-size:15px;font-weight:600;text-align:left}
+.sheet-item:active{background:var(--line-2)}
+.sheet-item.sel{background:color-mix(in srgb,var(--brand) 10%, transparent);color:var(--brand)}
+.sheet-item.cancel{color:var(--mute);justify-content:center;font-weight:600;margin-top:4px}
+.tick{margin-left:auto;color:var(--brand);font-weight:800}
+
+.banner{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;margin-bottom:12px;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--brand) 16%, transparent),color-mix(in srgb,var(--brand) 8%, transparent));
+  border:1px solid color-mix(in srgb,var(--brand) 25%, transparent)}
+.banner .big{font-size:24px}
+.avatar-chip{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-bottom:10px}
+.avatar-chip .del{margin-left:auto;color:var(--bad);font-size:17px;padding:6px 8px}
 </style>
 </head>
 <body>
-<header><h1>🏠 Deberes del Hogar</h1><p id="sub"></p></header>
+
+<header class="appbar">
+  <div class="logo">🏠</div>
+  <div class="grow" style="min-width:0">
+    <h1>Deberes del Hogar</h1>
+    <p id="sub">Reparte los deberes sin pelear</p>
+  </div>
+  <button class="pill" id="status" data-a="tab" data-t="ajustes">—</button>
+</header>
+
 <main id="main"></main>
 <div id="toast"></div>
+<div id="sheet"></div>
+
 <nav id="nav"></nav>
 
 <script>
 'use strict';
 /* =======================================================================
-   Modelo: el calendario compartido "Deberes del hogar" es la base de datos.
-   - La configuración (personas, deberes, rotación) vive en la descripción
-     del calendario, con prefijo DH1:.
-   - Cada deber es un evento con propiedades privadas (dhKey, dhDone...),
-     así cualquier teléfono puede encontrarlo y actualizarlo.
+   El calendario compartido "Deberes del hogar" es la base de datos.
+   - Config (personas, deberes, rotación, aviso domingo) en la descripción.
+   - Cada deber es un evento con propiedades privadas (dhKey, dhDone...).
    ======================================================================= */
 
 const DAYS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-const COLORS=['#2f6f5e','#c2553a','#3b6fb6','#a8761d','#7a4aa3','#2b8a9e','#b0407a','#5c7a29'];
+const DAYS_S=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MONTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const COLORS=['#e07856','#5b8def','#b07cd6','#3fa98a','#d9a441','#e06a9b','#4bb3c9','#8aa54b'];
 const KEY='deberes-hogar-v2';
 const SCOPE='openid email https://www.googleapis.com/auth/calendar';
 const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone;
-const PREFIX='DH1:';
-// Si pegas aquí el Client ID, todos los teléfonos funcionan sin configurar nada.
+const PREFIX='DH2:';
 const CLIENT_ID_DEFAULT='872298332090-mudshrohbis3191obef4fss2s9h4r4rh.apps.googleusercontent.com';
 const DEFAULT_CHORES=['Lavar los platos','Sacar la basura','Barrer y trapear','Limpiar el baño','Cocinar','Lavar la ropa','Ordenar la sala','Regar las plantas'];
 
 let S=load();
 let tok=null, tokExp=0, busy=false, tab='semana', wOff=0;
-let VIEW=[];          // asignaciones de la semana mostrada
-let EVMAP={};         // key -> evento de Google
-let CALPICK=[];       // calendarios para elegir
-let CONNECTED=false;
+let VIEW=[], EVMAP={}, CALPICK=[], CONNECTED=false;
+let dirty=false, saving=false, saveTimer=null;
 
 function load(){
   let s={};
   try{ s=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
-  return Object.assign({
+  const base={
     clientId:CLIENT_ID_DEFAULT, calendarId:'', calendarName:'', account:'',
-    members:[], overrides:{}, weeks:4,
+    members:[], overrides:{}, weeks:4, sunday:{on:true,time:'20:00'},
     chores:DEFAULT_CHORES.map((n,i)=>({id:'c'+i,name:n,active:false,day:i%7,time:'18:00'}))
-  }, s);
+  };
+  const st=Object.assign(base,s);
+  st.sunday=Object.assign({on:true,time:'20:00'}, s.sunday||{});
+  return st;
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials=n=>String(n||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
 
-/* ---------- Fechas ---------- */
+/* ---------- fechas ---------- */
 function monday(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function parseISO(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
-function weekIndex(m){return Math.round((m-new Date(2024,0,1))/(7*864e5));} // 1-ene-2024 fue lunes
-function fmt(d){return d.toLocaleDateString('es',{day:'numeric',month:'short'});}
+function weekIndex(m){return Math.round((m-new Date(2024,0,1))/(7*864e5));}
 function dateAt(d,time){const [h,m]=String(time||'18:00').split(':').map(Number);const x=new Date(d);x.setHours(h||0,m||0,0,0);return x;}
+const fmtShort=d=>d.getDate()+' '+MONTHS[d.getMonth()];
+const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
 
-/* ---------- Rotación (determinista: igual en todos los teléfonos) ---------- */
+/* ---------- rotación ---------- */
 function assignments(mon){
   const act=S.chores.filter(c=>c.active), n=S.members.length;
   if(!n) return [];
@@ -122,19 +253,15 @@ const colorOf=m=>COLORS[Math.max(0,S.members.findIndex(x=>x.id===m.id))%COLORS.l
 /* ---------- Google ---------- */
 function auth(){
   return new Promise((res,rej)=>{
-    if(!S.clientId) return rej(new Error('Falta el Client ID de Google (pestaña Ajustes).'));
+    if(!S.clientId) return rej(new Error('Falta el Client ID de Google.'));
     if(tok&&Date.now()<tokExp) return res();
-    if(!window.google||!google.accounts) return rej(new Error('No se pudo cargar Google. Revisa tu conexión a internet.'));
+    if(!window.google||!google.accounts) return rej(new Error('No se pudo cargar Google. Revisa la conexión.'));
     const tc=google.accounts.oauth2.initTokenClient({
       client_id:S.clientId, scope:SCOPE,
-      callback:r=>{
-        if(r.error) return rej(new Error(r.error));
-        tok=r.access_token; tokExp=Date.now()+(Number(r.expires_in||3600)-60)*1000;
-        res();
-      },
+      callback:r=>{ if(r.error) return rej(new Error(r.error)); tok=r.access_token; tokExp=Date.now()+(Number(r.expires_in||3600)-60)*1000; res(); },
       error_callback:e=>{
         const t=(e&&(e.type||e.message))||'';
-        if(/popup/i.test(t)) return rej(new Error('El navegador bloqueó la ventana de Google. Abre la app en Chrome y vuelve a intentar.'));
+        if(/popup/i.test(t)) return rej(new Error('El navegador bloqueó la ventana de Google. Abre la app en Chrome y reintenta.'));
         rej(new Error(t||'Autorización cancelada'));
       }
     });
@@ -142,21 +269,24 @@ function auth(){
   });
 }
 async function api(path,opt={}){
-  const r=await fetch('https://www.googleapis.com/calendar/v3'+path,{
-    ...opt,
-    headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'}
-  });
+  const r=await fetch('https://www.googleapis.com/calendar/v3'+path,{...opt,headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'}});
   if(r.status===401){ tok=null; tokExp=0; const e=new Error('La sesión de Google caducó. Toca «Conectar con Google».'); e.status=401; throw e; }
   if(!r.ok){ let m='Error '+r.status; try{ m=(await r.json()).error.message; }catch(e){} const err=new Error(m); err.status=r.status; throw err; }
   return r.status===204?null:r.json();
 }
 const enc=encodeURIComponent;
+async function pool(items,limit,fn){
+  const arr=items.slice(); const workers=Array.from({length:Math.min(limit,arr.length)},async()=>{
+    while(arr.length){ const it=arr.shift(); await fn(it); }
+  });
+  await Promise.all(workers);
+}
 
-/* ---------- Configuración en el calendario ---------- */
+/* ---------- config ---------- */
 function packCfg(){
   return {m:S.members.map(x=>[x.id,x.name,x.email||'']),
           c:S.chores.map(x=>[x.id,x.name,x.active?1:0,x.day,x.time]),
-          o:S.overrides, w:S.weeks};
+          o:S.overrides, w:S.weeks, s:[S.sunday.on?1:0,S.sunday.time]};
 }
 function applyCfg(o){
   if(!o) return;
@@ -164,25 +294,23 @@ function applyCfg(o){
   if(Array.isArray(o.c)) S.chores=o.c.map(a=>({id:a[0],name:a[1],active:!!a[2],day:a[3]|0,time:a[4]||'18:00'}));
   if(o.o&&typeof o.o==='object') S.overrides=o.o;
   if(o.w) S.weeks=o.w;
+  if(Array.isArray(o.s)) S.sunday={on:!!o.s[0],time:o.s[1]||'20:00'};
   save();
 }
 async function pullCfg(){
   const cal=await api('/calendars/'+enc(S.calendarId));
   S.calendarName=cal.summary||'';
   const d=String(cal.description||'');
-  if(d.indexOf(PREFIX)===0){
-    try{ applyCfg(JSON.parse(d.slice(PREFIX.length))); }catch(e){ }
-  }
-  return true;
+  if(d.indexOf(PREFIX)===0){ try{ applyCfg(JSON.parse(d.slice(PREFIX.length))); }catch(e){} }
+  else if(d.indexOf('DH1:')===0){ try{ applyCfg(JSON.parse(d.slice(4))); }catch(e){} }
 }
 async function pushCfg(){
   await api('/calendars/'+enc(S.calendarId),{method:'PATCH',body:JSON.stringify({description:PREFIX+JSON.stringify(packCfg())})});
 }
 
-/* ---------- Eventos ---------- */
+/* ---------- eventos ---------- */
 function eventBody(a,prev,mark){
   const p=(prev&&prev.extendedProperties&&prev.extendedProperties.private)||{};
-  // el estado "hecho" se conserva si la persona no cambió
   const done = mark ? !!mark.done : (p.dhDone==='1'&&p.dhMember===a.member.id);
   const by = done ? (mark?mark.by:(p.dhBy||'')) : '';
   const at = done ? (mark?mark.at:(p.dhAt||'')) : '';
@@ -221,50 +349,53 @@ async function upsert(a,mark){
   if(prev&&prev.id){
     EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(prev.id),{method:'PATCH',body:json});
   }else{
-    try{
-      EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events',{method:'POST',body:json});
-    }catch(e){
+    try{ EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events',{method:'POST',body:json}); }
+    catch(e){
       if(e.status!==409) throw e;
       const d=parseISO(a.key.split('|')[0]);
       const map=await listEvents(addDays(d,-1),addDays(d,2));
-      const found=map[a.key];
-      if(!found) throw e;
+      const found=map[a.key]; if(!found) throw e;
       EVMAP[a.key]=await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(found.id),{method:'PATCH',body:json});
     }
   }
 }
+function needsUpdate(a){
+  const ev=EVMAP[a.key]; if(!ev) return true;
+  const b=eventBody(a,ev), p=(ev.extendedProperties&&ev.extendedProperties.private)||{};
+  const t1=new Date(((ev.start||{}).dateTime)||0).getTime();
+  const t2=dateAt(a.date,a.chore.time).getTime();
+  return ev.summary!==b.summary || t1!==t2 || p.dhMember!==a.member.id || p.dhDone!==b.extendedProperties.private.dhDone;
+}
+/* Crea/actualiza solo desde hoy en adelante; lo pasado no se toca ni se borra. */
 async function pushWeeks(weeks){
   if(!S.calendarId) throw new Error('Primero vincula el calendario (Ajustes).');
-  const mon=monday(new Date());
+  const mon=monday(new Date()), now=Date.now(), limit=iso(mon);
   const want=[], valid=new Set();
-  for(let w=0;w<weeks;w++) for(const a of assignments(addDays(mon,w*7))){ want.push(a); valid.add(a.key); }
+  for(let w=0;w<weeks;w++) for(const a of assignments(addDays(mon,w*7))){
+    valid.add(a.key);
+    if(dateAt(a.date,a.chore.time).getTime()<now-60000) continue;  // días pasados: no se crean
+    want.push(a);
+  }
   EVMAP=await listEvents(addDays(mon,-1),addDays(mon,weeks*7+2));
-  let n=0;
-  for(const a of want){
-    try{ await upsert(a); n++; }
-    catch(e){ if(e.status===401) throw e; }
-  }
-  // borra del calendario lo que ya no corresponde
-  for(const k of Object.keys(EVMAP)){
-    if(!valid.has(k)){
-      try{ await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(EVMAP[k].id),{method:'DELETE'}); }catch(e){}
-      delete EVMAP[k];
-    }
-  }
-  return n;
+  const jobs=want.filter(needsUpdate);
+  await pool(jobs,5,a=>upsert(a));
+  // solo se borra lo que sobra de esta semana en adelante; el pasado no se toca
+  const del=Object.keys(EVMAP).filter(k=>k.split('|')[0]>=limit&&!valid.has(k));
+  await pool(del,4,async k=>{
+    try{ await api('/calendars/'+enc(S.calendarId)+'/events/'+enc(EVMAP[k].id),{method:'DELETE'}); }catch(e){}
+    delete EVMAP[k];
+  });
+  return jobs.length;
 }
 
-/* ---------- Calendario compartido ---------- */
-async function findCalendar(){
-  const r=await api('/users/me/calendarList?maxResults=250');
-  const items=(r.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
-  const match=items.filter(c=>/deberes del hogar/i.test(c.summary||''));
-  if(match.length) return match[0];
-  return null;
-}
+/* ---------- calendario ---------- */
 async function listWritable(){
   const r=await api('/users/me/calendarList?maxResults=250');
   return (r.items||[]).filter(c=>c.accessRole==='owner'||c.accessRole==='writer');
+}
+async function findCalendar(){
+  const items=await listWritable();
+  return items.filter(c=>/deberes del hogar/i.test(c.summary||''))[0]||null;
 }
 async function createCalendar(){
   const c=await api('/calendars',{method:'POST',body:JSON.stringify({summary:'Deberes del hogar',timeZone:TZ})});
@@ -274,224 +405,372 @@ async function createCalendar(){
 }
 async function shareAll(){
   const cal=enc(S.calendarId); let added=0, already=0, failed=0;
+  const me=String(S.account||'').toLowerCase();
   for(const m of S.members){
     if(!m.email) continue;
+    if(m.email.toLowerCase()===me){ already++; continue; }   // yo ya soy dueño
     try{
       await api('/calendars/'+cal+'/acl',{method:'POST',body:JSON.stringify({role:'writer',scope:{type:'user',value:m.email}})});
       added++;
-    }catch(e){ (e.status===409?already++:failed++); }
+    }catch(e){ (e.status===409||e.status===403?already++:failed++); }
   }
   return {added,already,failed};
 }
+/* Evento semanal que recuerda revisar los deberes el domingo. */
+let sundaySig='';
+async function syncSunday(force){
+  if(!S.calendarId) return;
+  const sig=(S.sunday.on?'1':'0')+'|'+S.sunday.time;
+  if(!force&&sig===sundaySig) return;
+  const cal=enc(S.calendarId);
+  const q=new URLSearchParams({privateExtendedProperty:'dhSunday=1',maxResults:'5'});
+  const res=await api('/calendars/'+cal+'/events?'+q);
+  const found=((res.items||[]).filter(ev=>ev.extendedProperties&&ev.extendedProperties.private&&ev.extendedProperties.private.dhSunday==='1'))[0];
+  if(!S.sunday.on){ if(found) await api('/calendars/'+cal+'/events/'+enc(found.id),{method:'DELETE'}); sundaySig=sig; return; }
+  const [h,m]=String(S.sunday.time||'20:00').split(':').map(Number);
+  const d=new Date(); d.setDate(d.getDate()+((7-d.getDay())%7)); d.setHours(h||20,m||0,0,0);
+  if(d.getTime()<Date.now()) d.setDate(d.getDate()+7);
+  const body={summary:'📋 Elegir los deberes de la semana',
+    description:'Cada domingo: revisa quién hace qué en la app Deberes del Hogar.',
+    start:{dateTime:d.toISOString(),timeZone:TZ},
+    end:{dateTime:new Date(d.getTime()+15*60000).toISOString(),timeZone:TZ},
+    recurrence:['RRULE:FREQ=WEEKLY;BYDAY=SU'],
+    reminders:{useDefault:false,overrides:[{method:'popup',minutes:0}]},
+    extendedProperties:{private:{dhSunday:'1'}}};
+  if(found) await api('/calendars/'+cal+'/events/'+enc(found.id),{method:'PATCH',body:JSON.stringify(body)});
+  else await api('/calendars/'+cal+'/events',{method:'POST',body:JSON.stringify(body)});
+  sundaySig=sig;
+}
 
-/* ---------- Sincronización general ---------- */
+/* ---------- conexión ---------- */
 async function connect(){
   await auth();
   if(!S.account){
-    try{ const u=await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})).json(); if(u&&u.email) S.account=u.email; save(); }catch(e){}
+    try{ const u=await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})).json();
+      if(u&&u.email) S.account=u.email; save(); }catch(e){}
   }
   CONNECTED=true;
-  if(!S.calendarId){
-    const c=await findCalendar();
-    if(c){ S.calendarId=c.id; S.calendarName=c.summary; save(); }
-  }
+  if(!S.calendarId){ const c=await findCalendar(); if(c){ S.calendarId=c.id; S.calendarName=c.summary; save(); } }
   if(S.calendarId) await pullCfg();
 }
 async function refresh(quiet){
-  if(!tok||Date.now()>=tokExp) return;
-  if(!S.calendarId) return;
+  if(!tok||Date.now()>=tokExp||!S.calendarId) return;
   try{
-    await pullCfg();
+    if(!dirty&&!saving) await pullCfg();
     const mon=addDays(monday(new Date()),wOff*7);
     EVMAP=await listEvents(addDays(mon,-1),addDays(mon,8));
   }catch(e){ if(!quiet) throw e; }
   render();
 }
 
-/* ---------- UI ---------- */
-function toast(msg,ms=3500){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',ms);}
+/* ---------- guardado diferido (sin bloquear la UI) ---------- */
+function touch(){ dirty=true; paintStatus(); clearTimeout(saveTimer); saveTimer=setTimeout(flush,700); }
+async function flush(force){
+  if(saving||(!dirty&&!force)) return;
+  if(!S.calendarId||!tok||Date.now()>=tokExp){ paintStatus(); return; }
+  saving=true; paintStatus();
+  try{
+    await pushCfg();
+    await pushWeeks(S.weeks);
+    await syncSunday();
+    dirty=false;
+  }catch(e){ toast('No se pudo guardar: '+e.message,6000); }
+  saving=false; paintStatus(); render();
+}
+
+/* ---------- UI base ---------- */
+function toast(msg,ms=3600){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',ms);}
+function paintStatus(){
+  const el=document.getElementById('status'); if(!el) return;
+  let txt='—', on=false;
+  if(saving){ txt='Guardando…'; }
+  else if(dirty){ txt='Sin guardar'; }
+  else if(CONNECTED&&tok){ txt='Conectado'; on=true; }
+  else if(S.calendarId){ txt='Conectar'; }
+  else { txt='Configurar'; }
+  el.textContent=txt; el.classList.toggle('on',on&&!dirty&&!saving);
+}
 async function run(label,fn){
-  if(busy) return; busy=true; render(); toast(label+'…',60000);
+  if(busy) return; busy=true; paintStatus(); toast(label+'…',60000);
   try{ const r=await fn(); toast('Listo ✔'+(r!=null?` (${r})`:'')); }
   catch(e){ toast('Error: '+e.message,7000); }
   busy=false; try{ render(); }catch(e){}
 }
+function openSheet(title,items,onPick){
+  const el=document.getElementById('sheet');
+  el.innerHTML=`<div class="sheet-back" data-close="1"></div><div class="sheet">
+    <div class="handle"></div><h3>${esc(title)}</h3>
+    ${items.map((it,i)=>`<button class="sheet-item ${it.selected?'sel':''}" data-pick="${i}">
+      ${it.color?`<span class="av" style="--av:${it.color}">${esc(initials(it.label))}</span>`:''}
+      <span>${esc(it.label)}</span>${it.selected?'<span class="tick">✓</span>':''}</button>`).join('')}
+    <button class="sheet-item cancel" data-close="1">Cancelar</button></div>`;
+  el.classList.add('open');
+  el._items=items; el._onPick=onPick;
+}
+function closeSheet(){ const el=document.getElementById('sheet'); el.classList.remove('open'); el.innerHTML=''; el._onPick=null; }
 const doneOf=k=>{const p=EVMAP[k]&&EVMAP[k].extendedProperties&&EVMAP[k].extendedProperties.private;return p&&p.dhDone==='1'?p:null;};
 
+/* ---------- vistas ---------- */
 function viewSemana(){
   const mon=addDays(monday(new Date()),wOff*7);
   VIEW=assignments(mon);
-  let h=`<div class="weeknav"><button class="ghost" data-a="prev">‹</button>
-    <div style="text-align:center"><div class="title">${wOff===0?'Esta semana':wOff===1?'Próxima semana':wOff===-1?'Semana pasada':'Semana'}</div>
-    <div class="sub">${fmt(mon)} – ${fmt(addDays(mon,6))}</div></div>
-    <button class="ghost" data-a="next">›</button></div>`;
+  const done=VIEW.filter(a=>doneOf(a.key)).length;
+  const pct=VIEW.length?Math.round(done/VIEW.length*100):0;
+  const isToday=d=>sameDay(d,new Date());
 
-  if(!S.members.length){ h+=`<div class="card empty">Agrega a las personas de la casa en la pestaña <b>Familia</b>.</div>`; return h; }
-  if(!VIEW.length){ h+=`<div class="card empty">Aún no escogiste deberes. Actívalos en la pestaña <b>Deberes</b>.</div>`; return h; }
-
-  VIEW.forEach(a=>{
-    const d=doneOf(a.key);
-    h+=`<div class="card ${d?'done':''}"><div class="row">
-      <input type="checkbox" data-a="done" data-key="${esc(a.key)}" ${d?'checked':''}>
-      <div class="grow"><div class="title">${esc(a.chore.name)}</div>
-        <div class="sub">${DAYS[a.chore.day]} ${a.date.getDate()} · ${esc(a.chore.time)}${d&&d.dhBy?` · <span class="who">hecho por ${esc(d.dhBy)}</span>`:''}</div></div>
-      <select data-a="override" data-key="${esc(a.key)}" style="width:auto;max-width:42%;font-weight:600;color:${colorOf(a.member)}">
-      ${S.members.map(m=>`<option value="${m.id}" ${m.id===a.member.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
-    </div></div>`;
-  });
-  h+=`<button class="full" data-a="sync">📅 Enviar ${S.weeks} semanas a Google Calendar</button>
-    <p class="note" style="text-align:center">La rotación cambia sola cada semana. Cambia el nombre para reasignar.</p>`;
-  return h;
-}
-function viewDeberes(){
-  let h=`<p class="note">Activa los deberes que se reparten y elige día y hora.</p>`;
-  S.chores.forEach(c=>{
-    h+=`<div class="card"><div class="row"><label class="sw grow"><input type="checkbox" data-a="toggle" data-id="${c.id}" ${c.active?'checked':''}><span class="title">${esc(c.name)}</span></label>
-      <button class="del" data-a="delchore" data-id="${c.id}">✕</button></div>
-      <div class="grid2"><select data-a="day" data-id="${c.id}">${DAYS.map((d,i)=>`<option value="${i}" ${i===c.day?'selected':''}>${d}</option>`).join('')}</select>
-      <input type="time" data-a="time" data-id="${c.id}" value="${esc(c.time)}"></div></div>`;
-  });
-  h+=`<h2>Nuevo deber</h2><div class="card"><input type="text" id="newchore" placeholder="Ej: Sacar al perro"><button class="full" data-a="addchore">Agregar deber</button></div>`;
-  return h;
-}
-function viewFamilia(){
-  let h=`<p class="note">Todos ven los mismos deberes en el calendario compartido «${esc(S.calendarName||'Deberes del hogar')}».</p>`;
-  S.members.forEach((m,i)=>{
-    h+=`<div class="card"><div class="row"><span class="chip" style="background:${COLORS[i%COLORS.length]}">${esc(m.name)}</span>
-      <div class="grow sub">${esc(m.email||'sin correo')}</div><button class="del" data-a="delmember" data-id="${m.id}">✕</button></div></div>`;
-  });
-  h+=`<h2>Agregar persona</h2><div class="card"><input type="text" id="nm" placeholder="Nombre"><div style="height:8px"></div>
-    <input type="email" id="ne" placeholder="Correo de Google (para que use la app)"><button class="full" data-a="addmember">Agregar</button></div>
-    <button class="full ghost" data-a="share">👥 Compartir el calendario con la familia</button>
-    <p class="note">Compartir da permiso de <b>edición</b>: cada uno entra con su propia cuenta desde su teléfono.</p>`;
-  return h;
-}
-function viewAjustes(){
-  const on=CONNECTED&&tok;
-  let h=`<div class="card"><div class="title">Conexión con Google</div>
-    <p class="sub">${on?('Conectado como '+(S.account||'tu cuenta')):'Sin conectar'}</p>
-    <label class="sub">Client ID (ver CONFIGURACION.md)</label>
-    <input type="text" id="cid" value="${esc(S.clientId)}" placeholder="1234-abc.apps.googleusercontent.com">
-    <button class="full" data-a="connect">${on?'🔄 Volver a conectar':'🔑 Conectar con Google'}</button></div>`;
-
-  h+=`<div class="card"><div class="title">Calendario compartido</div>
-    <p class="sub">${S.calendarId?esc(S.calendarName||'vinculado'):'sin vincular'}</p>
-    <button class="full ghost" data-a="findcal">🔎 Buscar el calendario de la familia</button>
-    <button class="full ghost" data-a="pickcal">📋 Elegir de mi lista</button>
-    <button class="full ghost" data-a="newcal">➕ Crear «Deberes del hogar»</button>
-    <label class="sub" style="display:block;margin-top:10px">Semanas a enviar</label>
-    <input type="number" id="wk" min="1" max="12" value="${S.weeks}">
-    <button class="full" data-a="savecfg">Guardar</button></div>`;
-
-  if(CALPICK.length){
-    h+=`<div class="card"><div class="title">Elige el calendario</div>
-      <select id="pick">${CALPICK.map(c=>`<option value="${esc(c.id)}" ${c.id===S.calendarId?'selected':''}>${esc(c.summary)}</option>`).join('')}</select>
-      <button class="full" data-a="pickgo">Vincular este calendario</button></div>`;
+  let h='';
+  if(new Date().getDay()===0&&wOff===0){
+    h+=`<div class="banner"><span class="big">📋</span><div class="grow"><div class="title">Hoy es domingo</div>
+      <div class="sub">Revisa los deberes de la semana y repártelos.</div></div>
+      <button class="btn soft sm" data-a="tab" data-t="deberes">Ver</button></div>`;
   }
 
-  h+=`<button class="full" data-a="sync">📅 Sincronizar calendario</button>
-    <button class="full ghost" data-a="share">👥 Compartir con la familia</button>
-    <button class="full ghost" data-a="reset" style="color:var(--bad);border-color:var(--bad)">Borrar datos de este teléfono</button>
-    <p class="note" style="text-align:center">La configuración se guarda en el calendario, no en el teléfono: cualquier persona de la casa ve lo mismo.</p>`;
+  h+=`<div class="weekbar">
+    <button class="icon-btn" data-a="prev" aria-label="Semana anterior">‹</button>
+    <div class="wk-label"><div class="t">${wOff===0?'Esta semana':wOff===1?'Próxima semana':wOff===-1?'Semana pasada':'Semana'}</div>
+      <div class="d mono">${fmtShort(mon)} – ${fmtShort(addDays(mon,6))}</div></div>
+    <button class="icon-btn" data-a="next" aria-label="Semana siguiente">›</button>
+  </div>`;
+
+  if(VIEW.length){
+    h+=`<div class="card tight"><div class="row" style="justify-content:space-between">
+      <div class="sub tight"><b class="mono" style="color:var(--ink)">${done}/${VIEW.length}</b> deberes hechos</div>
+      <div class="sub tight mono">${pct}%</div></div>
+      <div class="progress"><span style="width:${pct}%"></span></div></div>`;
+  }
+
+  if(!S.members.length) h+=`<div class="card empty"><div class="big">👨‍👩‍👧</div>Agrega a las personas de la casa en <b>Familia</b>.</div>`;
+  else if(!VIEW.length) h+=`<div class="card empty"><div class="big">🧹</div>Aún no escogiste deberes. Actívalos en <b>Deberes</b>.</div>`;
+
+  VIEW.forEach(a=>{
+    const d=doneOf(a.key), c=colorOf(a.member);
+    h+=`<div class="chore ${d?'done':''}">
+      <button class="chk" data-a="done" data-key="${esc(a.key)}" aria-label="Marcar hecho">✓</button>
+      <div class="body"><div class="nm">${esc(a.chore.name)}</div>
+        <div class="mt">${DAYS_S[a.chore.day]} ${a.date.getDate()} · ${esc(a.chore.time)}${isToday(a.date)?' · <b style="color:var(--brand)">hoy</b>':''}${d&&d.dhBy?` · lo hizo ${esc(String(d.dhBy).split('@')[0])}`:''}</div></div>
+      <button class="who" style="--av:${c}" data-a="assign" data-key="${esc(a.key)}">
+        <span class="av">${esc(initials(a.member.name))}</span><b>${esc(a.member.name)}</b></button>
+    </div>`;
+  });
+
+  if(VIEW.length) h+=`<button class="btn ghost" data-a="sync" style="margin-top:6px">🔄 Sincronizar con Google Calendar</button>
+    <p class="sub" style="text-align:center;margin:14px 0 0">La rotación cambia sola cada semana. Toca el nombre para reasignar.</p>`;
   return h;
 }
-function render(){
-  const sub=document.getElementById('sub');
-  sub.textContent=S.members.length?S.members.map(m=>m.name).join(' · '):'Reparte los deberes sin pelear';
-  let html;
-  try{
-    html={semana:viewSemana,deberes:viewDeberes,familia:viewFamilia,ajustes:viewAjustes}[tab]();
-  }catch(e){ html='<div class="card empty">Error: '+esc(e.message)+'</div>'; }
-  document.getElementById('main').innerHTML=html;
-  const tabs=[['semana','🗓️','Semana'],['deberes','🧹','Deberes'],['familia','👨‍👩‍👧','Familia'],['ajustes','⚙️','Ajustes']];
-  document.getElementById('nav').innerHTML=tabs.map(t=>`<button data-a="tab" data-t="${t[0]}" class="${tab===t[0]?'on':''}"><span>${t[1]}</span>${t[2]}</button>`).join('');
+
+function viewDeberes(){
+  let h=`<p class="sub" style="margin:2px 4px 14px">Activa lo que se reparte y elige día y hora. Se guarda solo.</p>`;
+  S.chores.forEach(c=>{
+    h+=`<div class="card">
+      <div class="row">
+        <div class="grow"><div class="title">${esc(c.name)}</div>
+          <div class="sub tight">${DAYS[c.day]} · ${esc(c.time)}</div></div>
+        <button class="icon-btn mini" data-a="delchore" data-id="${c.id}" aria-label="Quitar deber">✕</button>
+        <label class="sw"><input type="checkbox" data-a="toggle" data-id="${c.id}" ${c.active?'checked':''}><i></i></label>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <select data-a="day" data-id="${c.id}" aria-label="Día">${DAYS.map((d,i)=>`<option value="${i}" ${i===c.day?'selected':''}>${d}</option>`).join('')}</select>
+        <input type="time" data-a="time" data-id="${c.id}" value="${esc(c.time)}" aria-label="Hora">
+      </div>
+    </div>`;
+  });
+  h+=`<div class="card"><div class="title" style="margin-bottom:10px">Nuevo deber</div>
+    <input type="text" id="newchore" placeholder="Ej: Sacar al perro">
+    <button class="btn" data-a="addchore" style="margin-top:10px">Agregar deber</button></div>`;
+  return h;
 }
 
-/* ---------- Acciones ---------- */
+function viewFamilia(){
+  let h=`<p class="sub" style="margin:2px 4px 14px">Todos ven y editan el mismo calendario compartido.</p>`;
+  if(!S.members.length) h+=`<div class="card empty"><div class="big">👋</div>Agrega a la primera persona.</div>`;
+  S.members.forEach(m=>{
+    h+=`<div class="avatar-chip"><span class="av lg" style="--av:${colorOf(m)}">${esc(initials(m.name))}</span>
+      <div class="grow"><div class="title">${esc(m.name)}</div><div class="sub tight">${esc(m.email||'sin correo · solo en este teléfono')}</div></div>
+      <button class="del" data-a="delmember" data-id="${m.id}" aria-label="Quitar">✕</button></div>`;
+  });
+  h+=`<div class="card" style="margin-top:14px"><div class="title" style="margin-bottom:10px">Agregar persona</div>
+    <input type="text" id="nm" placeholder="Nombre" autocomplete="off">
+    <div style="height:10px"></div>
+    <input type="email" id="ne" placeholder="Correo de Google (para usar la app)" autocomplete="off" inputmode="email">
+    <button class="btn" data-a="addmember" style="margin-top:10px">Agregar</button>
+    <button class="btn soft" data-a="share" style="margin-top:8px">👥 Compartir el calendario con la familia</button>
+    <p class="sub" style="margin:10px 2px 0">Compartir da permiso de <b>edición</b>. A cada uno le llega un correo de Google.</p>
+  </div>`;
+  return h;
+}
+
+function viewAjustes(){
+  const on=CONNECTED&&tok;
+  let h='';
+  h+=`<div class="card">
+    <div class="item"><span class="av lg" style="--av:${on?'#3fa98a':'#8fa39b'}">${on?esc(initials(S.account)):'?'}</span>
+      <div class="grow"><div class="t">${on?esc(S.account||'Conectado'):'Sin conectar'}</div>
+        <div class="s">${on?'Google Calendar conectado':'Toca conectar para empezar'}</div></div>
+      ${on?'<span class="tag">Activo</span>':''}</div>
+    <button class="btn" data-a="connect" style="margin-top:12px">${on?'🔄 Volver a conectar':'🔑 Conectar con Google'}</button>
+  </div>`;
+
+  h+=`<div class="card"><div class="h2" style="margin:0 0 8px">Calendario compartido</div>
+    <div class="item"><div class="grow"><div class="t">${S.calendarId?esc(S.calendarName||'Vinculado'):'Sin vincular'}</div>
+      <div class="s">${S.calendarId?'Los deberes se guardan aquí':'Crea o busca el de la familia'}</div></div>
+      ${S.calendarId?'<span class="tag">OK</span>':''}</div>
+    <div class="btn-row"><button class="btn ghost sm grow" data-a="findcal">🔎 Buscar</button>
+      <button class="btn ghost sm grow" data-a="pickcal">📋 Elegir</button></div>
+    <button class="btn ghost" data-a="newcal" style="margin-top:10px">➕ Crear «Deberes del hogar»</button>
+  </div>`;
+
+  if(CALPICK.length){
+    h+=`<div class="card"><div class="title" style="margin-bottom:10px">Elige el calendario</div>
+      <select id="pick">${CALPICK.map(c=>`<option value="${esc(c.id)}" ${c.id===S.calendarId?'selected':''}>${esc(c.summary)}</option>`).join('')}</select>
+      <button class="btn" data-a="pickgo" style="margin-top:10px">Vincular este calendario</button></div>`;
+  }
+
+  h+=`<div class="card">
+    <div class="item"><div class="grow"><div class="t">Aviso de domingo</div>
+      <div class="s">Un recordatorio semanal en el calendario para elegir los deberes</div></div>
+      <label class="sw"><input type="checkbox" data-a="sunday" ${S.sunday.on?'checked':''}><i></i></label></div>
+    ${S.sunday.on?`<label class="lbl">Hora del aviso</label><input type="time" data-a="sundaytime" value="${esc(S.sunday.time)}">`:''}
+    <label class="lbl">Semanas a enviar</label>
+    <input type="number" id="wk" min="1" max="12" value="${S.weeks}">
+  </div>`;
+
+  h+=`<button class="btn" data-a="sync">📅 Sincronizar ahora</button>
+    <button class="btn ghost" data-a="share" style="margin-top:10px">👥 Compartir con la familia</button>
+    <button class="btn danger" data-a="reset" style="margin-top:10px">Borrar datos de este teléfono</button>
+    <p class="sub" style="text-align:center;margin:16px 0 4px">La configuración vive en el calendario, no en el teléfono.</p>`;
+  return h;
+}
+
+const ICONS={
+  semana:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+  deberes:'<svg viewBox="0 0 24 24"><path d="M9 5h9M9 12h9M9 19h9"/><circle cx="4.5" cy="5" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="19" r="1.3"/></svg>',
+  familia:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M17.5 14.6c2 .6 3.4 2.3 3.4 4.6"/></svg>',
+  ajustes:'<svg viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 17h4M12 17h8"/><circle cx="14" cy="7" r="2.4"/><circle cx="10" cy="17" r="2.4"/></svg>'
+};
+function render(){
+  const ae=document.activeElement, keep=(ae&&['newchore','nm','ne','wk'].includes(ae.id))?{id:ae.id,v:ae.value,pos:ae.selectionStart}:null;
+  document.getElementById('sub').textContent = S.members.length
+    ? S.members.map(m=>m.name).join(' · ')
+    : 'Reparte los deberes sin pelear';
+  let html;
+  try{ html={semana:viewSemana,deberes:viewDeberes,familia:viewFamilia,ajustes:viewAjustes}[tab](); }
+  catch(e){ html='<div class="card empty">Error: '+esc(e.message)+'</div>'; }
+  document.getElementById('main').innerHTML=html;
+  document.getElementById('nav').innerHTML=[['semana','Semana'],['deberes','Deberes'],['familia','Familia'],['ajustes','Ajustes']]
+    .map(([k,l])=>`<button data-a="tab" data-t="${k}" class="${tab===k?'on':''}">${ICONS[k]}<span>${l}</span></button>`).join('');
+  if(keep){ const el=document.getElementById(keep.id); if(el){ el.value=keep.v; el.focus(); try{ el.setSelectionRange(keep.pos,keep.pos); }catch(e){} } }
+  paintStatus();
+}
+
+/* ---------- acciones ---------- */
 function findAssignment(key){
   const a=VIEW.find(x=>x.key===key);
   if(a) return a;
-  const mon=monday(parseISO(key.split('|')[0]));
-  return assignments(mon).find(x=>x.key===key)||null;
+  return assignments(monday(parseISO(key.split('|')[0]))).find(x=>x.key===key)||null;
 }
-async function afterCfgChange(){
-  await pushCfg();
-  await pushWeeks(S.weeks);
+function setLocalDone(key,done,by){
+  const ev=EVMAP[key]||{extendedProperties:{private:{}}};
+  const p=Object.assign({},ev.extendedProperties&&ev.extendedProperties.private);
+  p.dhDone=done?'1':'0'; p.dhBy=done?(by||''):''; p.dhAt=done?new Date().toISOString():'';
+  EVMAP[key]=Object.assign({},ev,{extendedProperties:{private:p}});
 }
-
 function onAction(e){
   const el=e.target.closest('[data-a]'); if(!el) return;
   const a=el.dataset.a, ch=e.type==='change';
-  if(busy&&a!=='tab') return;
   const chore=S.chores.find(c=>c.id===el.dataset.id);
 
-  if(a==='tab'&&!ch){ tab=el.dataset.t; render(); window.scrollTo(0,0); }
-  else if(a==='prev'&&!ch){ wOff--; render(); refresh(true); }
-  else if(a==='next'&&!ch){ wOff++; render(); refresh(true); }
+  if(a==='tab'&&!ch){ tab=el.dataset.t; render(); window.scrollTo(0,0); return; }
 
-  else if(a==='override'&&ch){
+  /* --- semana --- */
+  if(a==='prev'&&!ch){ wOff--; render(); refresh(true); return; }
+  if(a==='next'&&!ch){ wOff++; render(); refresh(true); return; }
+  if(a==='done'&&!ch){
     const asg=findAssignment(el.dataset.key); if(!asg) return;
-    if(el.value===asg.member.id){ delete S.overrides[el.dataset.key]; }
-    else { S.overrides[el.dataset.key]=el.value; }
-    save();
-    run('Reasignando',async()=>{ await pushCfg(); await upsert(findAssignment(el.dataset.key)); return null; });
+    const nowDone=!!doneOf(asg.key);
+    setLocalDone(asg.key,!nowDone,S.account||asg.member.name);
     render();
+    (async()=>{
+      try{ await auth(); await upsert(asg,doneOf(asg.key)?null:{done:false,by:'',at:''}); }
+      catch(err){ setLocalDone(asg.key,nowDone,S.account||''); render(); toast(err.message,5000); }
+    })();
+    return;
   }
-  else if(a==='done'&&ch){
-    const asg=findAssignment(el.dataset.key); if(!asg) return;
-    const done=el.checked;
-    const mark={done, by:done?(S.account||asg.member.name):'', at:done?new Date().toISOString():''};
-    run(done?'Marcando hecho':'Desmarcando',async()=>{ await upsert(asg,mark); return null; });
-    render();
+  if(a==='assign'&&!ch){
+    const key=el.dataset.key, asg=findAssignment(key); if(!asg) return;
+    openSheet('¿Quién lo hace?', S.members.map(m=>({label:m.name,value:m.id,color:colorOf(m),selected:m.id===asg.member.id})), async m=>{
+      if(m.id===asg.member.id){ delete S.overrides[key]; } else { S.overrides[key]=m.id; }
+      save(); render(); touch();
+    });
+    return;
   }
-  else if(a==='toggle'&&ch){ chore.active=el.checked; run('Guardando',afterCfgChange); }
-  else if(a==='day'&&ch){ chore.day=+el.value; run('Guardando',afterCfgChange); }
-  else if(a==='time'&&ch){ chore.time=el.value||'18:00'; run('Guardando',afterCfgChange); }
-  else if(a==='delchore'&&!ch){ if(confirm('¿Quitar este deber?')){ S.chores=S.chores.filter(c=>c.id!==el.dataset.id); run('Quitando',afterCfgChange); render(); } }
-  else if(a==='addchore'&&!ch){ const v=document.getElementById('newchore').value.trim(); if(v){ S.chores.push({id:'c'+uid(),name:v,active:true,day:0,time:'18:00'}); run('Agregando',afterCfgChange); render(); } }
-  else if(a==='addmember'&&!ch){ const n=document.getElementById('nm').value.trim(), m=document.getElementById('ne').value.trim(); if(n){ S.members.push({id:'m'+uid(),name:n,email:m}); run('Agregando',afterCfgChange); render(); } }
-  else if(a==='delmember'&&!ch){ if(confirm('¿Quitar a esta persona?')){ S.members=S.members.filter(m=>m.id!==el.dataset.id); run('Quitando',afterCfgChange); render(); } }
 
-  else if(a==='connect'&&!ch){
-    S.clientId=(document.getElementById('cid')&&document.getElementById('cid').value.trim())||S.clientId;
-    save();
-    run('Conectando',async()=>{ tok=null; tokExp=0; await connect(); if(S.calendarId) return S.calendarName||'calendario listo'; return null; });
+  /* --- deberes --- */
+  if(a==='toggle'&&ch){ chore.active=el.checked; save(); touch(); return; }
+  if(a==='day'&&ch){ chore.day=+el.value; save(); touch(); return; }
+  if(a==='time'&&ch){ chore.time=el.value||'18:00'; save(); touch(); return; }
+  if(a==='delchore'&&!ch){ if(confirm('¿Quitar «'+chore.name+'»?')){ S.chores=S.chores.filter(c=>c.id!==chore.id); save(); touch(); render(); } return; }
+  if(a==='addchore'&&!ch){
+    const v=(document.getElementById('newchore')||{}).value||''; const t=v.trim();
+    if(t){ S.chores.push({id:'c'+uid(),name:t,active:true,day:0,time:'18:00'}); save(); touch(); render(); }
+    return;
   }
-  else if(a==='savecfg'&&!ch){
-    S.clientId=(document.getElementById('cid')&&document.getElementById('cid').value.trim())||S.clientId;
-    S.weeks=Math.min(12,Math.max(1,+document.getElementById('wk').value||4));
-    save(); toast('Guardado ✔');
+
+  /* --- familia --- */
+  if(a==='addmember'&&!ch){
+    const n=((document.getElementById('nm')||{}).value||'').trim();
+    const m=((document.getElementById('ne')||{}).value||'').trim();
+    if(n){ S.members.push({id:'m'+uid(),name:n,email:m}); save(); touch(); render(); }
+    return;
   }
-  else if(a==='findcal'&&!ch){
-    run('Buscando',async()=>{ await auth(); const c=await findCalendar();
+  if(a==='delmember'&&!ch){
+    if(confirm('¿Quitar a esta persona?')){ S.members=S.members.filter(m=>m.id!==el.dataset.id); save(); touch(); render(); }
+    return;
+  }
+
+  /* --- ajustes --- */
+  if(a==='sunday'&&ch){ S.sunday.on=el.checked; save(); touch(); render(); return; }
+  if(a==='sundaytime'&&ch){ S.sunday.time=el.value||'20:00'; save(); touch(); return; }
+  if(a==='connect'&&!ch){ run('Conectando',async()=>{ tok=null; tokExp=0; await connect(); return S.calendarName||null; }); return; }
+  if(a==='findcal'&&!ch){ run('Buscando',async()=>{ await auth(); const c=await findCalendar();
       if(!c) throw new Error('No encontré el calendario. Pide que te lo compartan o créalo.');
-      S.calendarId=c.id; S.calendarName=c.summary; save(); await pullCfg(); return c.summary; });
-  }
-  else if(a==='pickcal'&&!ch){
-    run('Leyendo calendarios',async()=>{ await auth(); CALPICK=await listWritable(); return CALPICK.length+' calendarios'; });
-  }
-  else if(a==='pickgo'&&!ch){
-    const sel=document.getElementById('pick');
-    if(!sel||!sel.value) return;
+      S.calendarId=c.id; S.calendarName=c.summary; save(); await pullCfg(); return c.summary; }); return; }
+  if(a==='pickcal'&&!ch){ run('Leyendo calendarios',async()=>{ await auth(); CALPICK=await listWritable(); return CALPICK.length+' disponibles'; }); return; }
+  if(a==='pickgo'&&!ch){
+    const sel=document.getElementById('pick'); if(!sel||!sel.value) return;
     S.calendarId=sel.value; S.calendarName=sel.options[sel.selectedIndex].textContent; CALPICK=[]; save();
-    run('Vinculando',async()=>{ await pullCfg(); return S.calendarName; });
+    run('Vinculando',async()=>{ await pullCfg(); return S.calendarName; }); return;
   }
-  else if(a==='newcal'&&!ch){
-    run('Creando',async()=>{ await auth(); const n=await createCalendar(); await pushCfg(); return n; });
+  if(a==='newcal'&&!ch){ run('Creando',async()=>{ await auth(); const n=await createCalendar(); await syncSunday(); return n; }); return; }
+  if(a==='share'&&!ch){ run('Compartiendo',async()=>{ await auth();
+      const r=await shareAll();
+      return `${r.added} nuevos${r.already?', '+r.already+' ya tenían acceso':''}${r.failed?', '+r.failed+' fallaron':''}`; }); return; }
+  if(a==='sync'&&!ch){
+    S.weeks=Math.min(12,Math.max(1,+(document.getElementById('wk')||{}).value||S.weeks)); save();
+    run('Sincronizando',async()=>{ await auth(); await pullCfg(); await pushCfg(); await syncSunday(); const n=await pushWeeks(S.weeks); dirty=false; return n+' cambios'; });
+    return;
   }
-  else if(a==='share'&&!ch){
-    run('Compartiendo',async()=>{ await auth(); const r=await shareAll();
-      return `${r.added} nuevos${r.already?', '+r.already+' ya lo tenían':''}${r.failed?', '+r.failed+' fallaron':''}`; });
+  if(a==='reset'&&!ch){
+    if(confirm('Se borrarán los datos de este teléfono. El calendario de Google no se toca.')){
+      localStorage.removeItem(KEY); S=load(); tok=null; tokExp=0; CONNECTED=false; EVMAP={}; dirty=false; render();
+    }
+    return;
   }
-  else if(a==='sync'&&!ch){ run('Sincronizando',async()=>{ await auth(); await pullCfg(); const n=await pushWeeks(S.weeks); return n+' eventos'; }); }
-  else if(a==='reset'&&!ch){ if(confirm('Se borrarán los datos guardados en este teléfono. El calendario de Google no se toca.')){ localStorage.removeItem(KEY); S=load(); tok=null; tokExp=0; CONNECTED=false; EVMAP={}; render(); } }
 }
 document.addEventListener('click',onAction);
 document.addEventListener('change',onAction);
 
+document.getElementById('sheet').addEventListener('click',e=>{
+  const s=document.getElementById('sheet');
+  if(e.target.closest('[data-close]')) return closeSheet();
+  const p=e.target.closest('[data-pick]');
+  if(p&&s._onPick){ const it=s._items[+p.dataset.pick]; closeSheet(); s._onPick(it); }
+});
+
+/* ---------- arranque ---------- */
 render();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(true); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ refresh(true); if(dirty) flush(true); } });
+window.addEventListener('online',()=>{ if(dirty) flush(true); });
 </script>
 </body>
 </html>
