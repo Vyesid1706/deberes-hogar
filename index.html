@@ -218,6 +218,7 @@ function load(){
     chores:DEFAULT_CHORES.map((n,i)=>({id:'c'+i,name:n,active:false,day:i%7,time:'18:00'}))
   };
   const st=Object.assign(base,s);
+  if(!st.clientId) st.clientId=CLIENT_ID_DEFAULT;
   st.sunday=Object.assign({on:true,time:'20:00'}, s.sunday||{});
   return st;
 }

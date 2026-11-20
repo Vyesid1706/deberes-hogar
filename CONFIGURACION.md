@@ -62,10 +62,11 @@ Cada persona recibe un correo de Google (*"X compartió un calendario contigo"*)
 
 ## Uso diario
 
-- **Semana:** ves el reparto. Toca el nombre para cambiar a alguien, toca la casilla ✓ cuando esté hecho.
-- **Deberes:** activa los que se reparten y pon día y hora.
-- **📅 Sincronizar:** crea/actualiza los eventos de las próximas semanas. Hazlo después de cambiar deberes o personas.
-- La rotación de la semana siguiente se calcula sola.
+- **Semana:** ves el reparto y el avance (`3/8 deberes hechos`). Toca el círculo ✓ cuando esté hecho; toca el nombre para cambiar a quién le toca.
+- **Deberes:** activa los que se reparten y pon día y hora. Se guarda solo (mira el estado arriba: *Guardando…* / *Conectado*).
+- **Aviso de domingo:** en *Ajustes* puedes activar un recordatorio semanal (por defecto domingo 8:00 p. m.) que aparece en el calendario de toda la familia para elegir los deberes.
+- **📅 Sincronizar:** crea/actualiza los eventos de las próximas semanas. Normalmente no hace falta: cada cambio se envía solo.
+- **Días pasados:** nunca se crean eventos en fechas que ya pasaron; solo desde hoy en adelante.
 
 ---
 
