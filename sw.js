@@ -1,5 +1,5 @@
-const CACHE = 'deberes-hogar-v3';
-const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'deberes-hogar-v4';
+const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './heart.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
